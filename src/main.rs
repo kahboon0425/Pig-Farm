@@ -19,8 +19,8 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
         .insert_resource(Money(100.0))
-        .add_systems(Startup, setup)
-        .add_systems(Update, (character_movement, spawn_pig, pig_lifetime))
+        .add_systems(Startup, (setup, spawn_game_ui))
+        .add_systems(Update, (character_movement, spawn_pig, pig_lifetime, update_money_ui))
         .run();
 }
 
@@ -36,6 +36,9 @@ pub struct Money(pub f32);
 pub struct Pig {
     pub lifetime: Timer,
 }
+
+#[derive(Component)]
+pub struct MoneyText;
 
 fn setup(
     mut commands: Commands,
@@ -136,5 +139,43 @@ fn pig_lifetime(
             commands.entity(pig_entity).despawn();
             info!("Pig sold for RM 15 ! Current Money: RM {}", money.0);
         }
+    }
+}
+
+fn spawn_game_ui(mut commands: Commands) {
+    commands.spawn((
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(100.0),
+                height: Val::Percent(10.0),
+                align_items: AlignItems::Center,
+                padding:UiRect::all(Val::Px(10.0)),
+                ..default()
+            },
+            background_color: Color::BLUE.into(),
+            ..default()
+        },
+        Name::new("UI Root"),
+    ))
+    .with_children(|commands|{
+        commands.spawn((
+            TextBundle{
+                text:Text::from_section(
+                    "Money!",
+                    TextStyle{
+                        font_size: 32.0,
+                        ..default()
+                    },
+                ),
+                ..default()
+            },
+            MoneyText,
+        ));
+    });
+}
+
+fn update_money_ui(mut texts:Query<&mut Text, With<MoneyText>>, money: Res<Money>){
+    for mut text in &mut texts{
+        text.sections[0].value = format!("Money: RM {}", money.0);
     }
 }
