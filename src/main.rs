@@ -142,23 +142,33 @@ fn pig_lifetime(
     }
 }
 
-fn spawn_game_ui(mut commands: Commands) {
+fn spawn_game_ui(
+    mut commands: Commands
+) {
     commands.spawn((
+        // nodes are the basic building blocks for creating user interfaces.
         NodeBundle {
             style: Style {
+                // Sets the width of the node to 100% of its parent's width. 
                 width: Val::Percent(100.0),
+                // Sets the height of the node to 10% of its parent's height.
                 height: Val::Percent(10.0),
+                // Aligns the child elements of the node to the center.
                 align_items: AlignItems::Center,
+                // Adds padding of 10 pixels on all sides (top, right, bottom, left) of the node.
                 padding:UiRect::all(Val::Px(10.0)),
                 ..default()
             },
             background_color: Color::BLUE.into(),
             ..default()
         },
+        // Adds a Name component to the entity
         Name::new("UI Root"),
     ))
+    // with_children method is used to attach child elements to the root node.
     .with_children(|commands|{
         commands.spawn((
+            // This struct is used to create a text element in the UI. 
             TextBundle{
                 text:Text::from_section(
                     "Money!",
@@ -174,7 +184,10 @@ fn spawn_game_ui(mut commands: Commands) {
     });
 }
 
-fn update_money_ui(mut texts:Query<&mut Text, With<MoneyText>>, money: Res<Money>){
+fn update_money_ui(
+    mut texts:Query<&mut Text, With<MoneyText>>, 
+    money: Res<Money>
+){
     for mut text in &mut texts{
         text.sections[0].value = format!("Money: RM {}", money.0);
     }
